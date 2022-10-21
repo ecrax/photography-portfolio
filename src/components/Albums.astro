@@ -27,7 +27,7 @@ for (const e of albums) {
     const meta = await probe.sync(await fs.readFile(`src/images/${e}/${img}`));
 
     pathImages.push({
-      path: `src/images/${e}/${img}`,
+      path: `./src/images/${e}/${img}`,
       width: meta?.width ?? 0,
       height: meta?.height ?? 0,
     });
@@ -90,7 +90,7 @@ function getSpanEstimate(size: number) {
 <script>
   //TODO: get off of lightgallery because of weird license shit
   //https://github.com/dimsemenov/photoswipe
-  
+
   import lightgallery from "lightgallery";
   import lgZoom from "lightgallery/plugins/zoom";
 
