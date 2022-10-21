@@ -1,0 +1,71 @@
+---
+import fs from "node:fs/promises";
+import { Image } from "@astrojs/image/components";
+import probe from "probe-image-size";
+
+let allImages: {
+  name: string;
+  images: {
+    path: string;
+    width: number;
+    height: number;
+  }[];
+}[] = [];
+
+const albums = await fs.readdir("src/images");
+
+for (const e of albums) {
+  const images = await fs.readdir("src/images/" + e);
+  let pathImages: {
+    path: string;
+    width: number;
+    height: number;
+  }[] = [];
+  for (const img of images) {
+    const meta = await probe.sync(await fs.readFile(`src/images/${e}/${img}`));
+
+    pathImages.push({
+      path: `src/images/${e}/${img}`,
+      width: meta?.width ?? 0,
+      height: meta?.height ?? 0,
+    });
+  }
+
+  allImages.push({
+    name: e,
+    images: pathImages,
+  });
+}
+
+//console.log(allImages);
+---
+
+{
+  allImages.map((album) => (
+    <div class="w-full h-screen bg-white text-black p-16 flex flex-col">
+      <div class="flex justify-between w-full pb-16">
+        <div>{album.name.toLocaleLowerCase() + "_2022"}</div>
+      </div>
+      <div
+        class={`h-full grid grid-cols-3 grid-cols-${album.images.length} gap-4`}
+      >
+        {album.images.map((img) => (
+          <div class="hover:scale-105 transition-all duration-200">
+            <Image
+              alt=""
+              width={img.width * 0.25}
+              height={img.height * 0.25}
+              src={img.path}
+              class={
+                "h-full w-full object-cover"
+              }
+            />
+          </div>
+        ))}
+      </div>
+      <div class="italic text-sm pt-6 text-right w-full">
+        images taken with a vintage lens during a late night walk
+      </div>
+    </div>
+  ))
+}

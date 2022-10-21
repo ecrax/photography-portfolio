@@ -1,0 +1,19 @@
+---
+import Albums from "../components/Albums.astro";
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="Welcome to Astro.">
+  <main>
+    <div class="w-full h-screen bg-black text-white flex justify-between items-center flex-col p-16">
+      <div class="flex justify-between w-full">
+        <div>Leo Kling</div>
+        <div>Portfolio</div>
+      </div>
+      <h1 class="text-5xl font-semibold tracking-wide">photograhy.</h1>
+      <div>Social Media Blah Blah</div>
+    </div>
+    <Albums />
+    
+  </main>
+</Layout>
