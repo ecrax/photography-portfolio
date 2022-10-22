@@ -1,21 +1,20 @@
 ---
-import fs from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
 import probe from "probe-image-size";
 import "photoswipe/style.css";
 import GalleryImage from "./GalleryImage.astro";
+import { checkFileExists } from "../utils/fs";
 
-let allImages: {
-  name: string;
-  images: image[];
-}[] = [];
+let galleries: gallery[] = [];
 
-const albums = await fs.readdir("src/images");
+const albums = await readdir("src/images");
 
 for (const e of albums) {
-  const images = await fs.readdir("src/images/" + e);
+  const images = await readdir(`src/images/${e}`);
   let pathImages: image[] = [];
   for (const img of images) {
-    const meta = await probe.sync(await fs.readFile(`src/images/${e}/${img}`));
+    if (img.includes(".json")) continue;
+    const meta = await probe.sync(await readFile(`src/images/${e}/${img}`));
 
     pathImages.push({
       path: `./src/images/${e}/${img}`,
@@ -24,22 +23,39 @@ for (const e of albums) {
     });
   }
 
-  allImages.push({
-    name: e,
-    images: pathImages,
-  });
+  if (await checkFileExists(`src/images/${e}/info.json`)) {
+    const infoFile = await readFile(`src/images/${e}/info.json`);
+    const infoJson: gallery = JSON.parse(infoFile.toString());
+
+    console.info(`src/images/${e}/info.json FOUND`);
+
+    galleries.push({
+      name: infoJson.name ?? e,
+      images: pathImages,
+      year: infoJson.year,
+      subtitle: infoJson.subtitle,
+    });
+  } else {
+    console.info(`src/images/${e}/info.json NOT FOUND`);
+    galleries.push({
+      name: e,
+      images: pathImages,
+      year: "unknown",
+      subtitle: "",
+    });
+  }
 }
 ---
 
 {
-  allImages.reverse().map((album, i) => (
+  galleries.reverse().map((album, i) => (
     <div
-      class={`w-full min-h-screen ${
+      class={`w-full ${
         i % 2 === 0 ? "bg-white text-black" : "bg-black text-white"
-      } p-16 flex flex-col items-center`}
+      } p-8 md:p-16 flex flex-col items-center`}
     >
-      <div class="flex justify-between w-full pb-16">
-        <div>{album.name.toLocaleLowerCase() + "_2022"}</div>
+      <div class="flex justify-between w-full pl-2 pb-6 lg:pb-14">
+        <div>{album.name.toLocaleLowerCase() + "_" + album.year}</div>
       </div>
       <div
         id="gallery"
@@ -49,8 +65,8 @@ for (const e of albums) {
           <GalleryImage image={img} />
         ))}
       </div>
-      <div class="italic text-sm pt-6 text-right w-full">
-        images taken with a vintage lens during a late night walk
+      <div class="italic text-sm pt-6 text-right w-full p-2">
+        {album.subtitle}
       </div>
     </div>
   ))
