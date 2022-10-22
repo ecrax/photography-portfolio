@@ -1,0 +1,45 @@
+---
+import { getImage } from "@astrojs/image";
+import { Image } from "@astrojs/image/components";
+
+export interface Props {
+    image: image;
+}
+
+const { image } = Astro.props;
+
+//Fullscreen image
+const href = await getImage({
+    src: image.path,
+    width: image.width * 0.35,
+    height: image.height * 0.35,
+});
+
+function getSpanEstimate(size: number) {
+    //Make horizontal pictures 2 units wide (2x1)
+    if (size > 5000) {
+        return 2;
+    }
+
+    return 1;
+}
+---
+
+<a
+    class="cursor-pointer hover:scale-[1.02] transition-all duration-200 m-2 md:m-0"
+    style={`grid-column-end: span ${getSpanEstimate(
+        image.width
+    )}; grid-row-end: span: ${getSpanEstimate(image.height)};`}
+    data-pswp-width={image.width * 0.2}
+    data-pswp-height={image.height * 0.2}
+    data-cropped="true"
+    href={href.src}
+>
+    <Image
+        alt=""
+        width={image.width * 0.2}
+        height={image.height * 0.2}
+        src={image.path}
+        class={"h-full w-full object-cover"}
+    />
+</a>

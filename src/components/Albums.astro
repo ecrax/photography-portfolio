@@ -1,28 +1,19 @@
 ---
 import fs from "node:fs/promises";
-import { Image } from "@astrojs/image/components";
 import probe from "probe-image-size";
-import "lightgallery/css/lightgallery.css";
-import "lightgallery/css/lg-zoom.css";
+import "photoswipe/style.css";
+import GalleryImage from "./GalleryImage.astro";
 
 let allImages: {
   name: string;
-  images: {
-    path: string;
-    width: number;
-    height: number;
-  }[];
+  images: image[];
 }[] = [];
 
 const albums = await fs.readdir("src/images");
 
 for (const e of albums) {
   const images = await fs.readdir("src/images/" + e);
-  let pathImages: {
-    path: string;
-    width: number;
-    height: number;
-  }[] = [];
+  let pathImages: image[] = [];
   for (const img of images) {
     const meta = await probe.sync(await fs.readFile(`src/images/${e}/${img}`));
 
@@ -38,46 +29,24 @@ for (const e of albums) {
     images: pathImages,
   });
 }
-
-function getSpanEstimate(size: number) {
-  //Make horizontal pictures 2 units wide (2x1)
-  if (size > 5000) {
-    return 2;
-  }
-
-  return 1;
-}
-
-//console.log(allImages);
 ---
 
 {
   allImages.reverse().map((album, i) => (
-    <div class={`w-full min-h-screen ${i % 2 === 0 ? "bg-white text-black" : "bg-black text-white"} p-16 flex flex-col`}>
+    <div
+      class={`w-full min-h-screen ${
+        i % 2 === 0 ? "bg-white text-black" : "bg-black text-white"
+      } p-16 flex flex-col items-center`}
+    >
       <div class="flex justify-between w-full pb-16">
         <div>{album.name.toLocaleLowerCase() + "_2022"}</div>
       </div>
       <div
         id="gallery"
-        class={`grid grid-cols-[repeat(auto-fill,_minmax(300px,_1fr))] grid-rows-[repeat(auto-fit,_300px)] grid-flow-dense gap-4`}
+        class={`flex flex-col  md:grid md:grid-cols-[repeat(auto-fill,_minmax(300px,_1fr))] md:grid-rows-[repeat(auto-fit,_300px)] md:grid-flow-dense md:gap-4`}
       >
-        {album.images.map((img, i) => (
-          <div
-            style={`grid-column-end: span ${getSpanEstimate(
-              img.width
-            )}; grid-row-end: span: ${getSpanEstimate(img.height)};`}
-            class={`hover:scale-[1.02] transition-all duration-200`}
-          >
-            <a class="cursor-pointer img" data-lg-size={`${img.width}-${img.height}`}>
-              <Image
-                alt=""
-                width={img.width * 0.25}
-                height={img.height * 0.25}
-                src={img.path}
-                class={"h-full w-full object-cover"}
-              />
-            </a>
-          </div>
+        {album.images.map((img) => (
+          <GalleryImage image={img} />
         ))}
       </div>
       <div class="italic text-sm pt-6 text-right w-full">
@@ -88,17 +57,17 @@ function getSpanEstimate(size: number) {
 }
 
 <script>
-  //TODO: get off of lightgallery because of weird license shit
-  //https://github.com/dimsemenov/photoswipe
-
-  import lightgallery from "lightgallery";
-  import lgZoom from "lightgallery/plugins/zoom";
-
-  lightgallery(document.getElementById("gallery")!, {
-    plugins: [lgZoom],
+  import PhotoSwipeLightbox from "photoswipe/lightbox";
+  const lightbox = new PhotoSwipeLightbox({
+    gallery: "#gallery",
+    children: "a",
+    allowPanToNext: false,
+    allowMouseDrag: true,
+    wheelToZoom: true,
+    zoom: false,
     counter: false,
-    selector: "img",
-    download: false,
-    zoom: true,
+    pswpModule: () => import("photoswipe"),
   });
+
+  lightbox.init();
 </script>
