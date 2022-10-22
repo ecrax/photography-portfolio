@@ -59,7 +59,7 @@ for (const e of albums) {
       </div>
       <div
         id="gallery"
-        class={`flex flex-col  md:grid md:grid-cols-[repeat(auto-fill,_minmax(300px,_1fr))] md:grid-rows-[repeat(auto-fit,_300px)] md:grid-flow-dense md:gap-4`}
+        class={`flex flex-col md:grid md:grid-cols-[repeat(auto-fill,_minmax(300px,_1fr))] md:grid-rows-[repeat(auto-fill,_minmax(300px,_1fr))] md:grid-flow-dense md:gap-4`}
       >
         {album.images.map((img) => (
           <GalleryImage image={img} />
@@ -73,6 +73,7 @@ for (const e of albums) {
 }
 
 <script>
+  // @ts-ignore
   import PhotoSwipeLightbox from "photoswipe/lightbox";
   const lightbox = new PhotoSwipeLightbox({
     gallery: "#gallery",
