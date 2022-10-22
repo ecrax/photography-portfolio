@@ -55,7 +55,7 @@ for (const e of albums) {
       } p-8 md:p-16 flex flex-col items-center`}
     >
       <div class="flex justify-between w-full pl-2 pb-6 lg:pb-14">
-        <div>{album.name.toLocaleLowerCase() + "_" + album.year}</div>
+        <div>{album.name.toLocaleLowerCase() + "_" }<span>{album.year}</span></div>
       </div>
       <div
         id="gallery"
